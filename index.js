@@ -25,9 +25,43 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    // await client.connect();
+    await client.connect();
     // work
-    const user = client.db("educationManege").collection("users");
+    const usersCalection = client.db("educationManege").collection("users");
+    const allClassCalection = client
+      .db("educationManege")
+      .collection("allClass");
+
+    // get users calection
+    app.get("/users", async (req, res) => {
+      const users = usersCalection.find();
+      const result = await users.toArray();
+      res.send(result);
+    });
+    // post & seve user name,email,role in database
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const email = user.email;
+      const query = { email: email };
+      const oldUsers = await usersCalection.findOne(query);
+      if (oldUsers) {
+        return;
+      }
+      const result = await usersCalection.insertOne(user);
+      res.send(result);
+    });
+    // All class data calection get
+    app.get("/allclass", async (req, res) => {
+      const allClassData = allClassCalection.find();
+      const result = await allClassData.toArray();
+      res.send(result);
+    });
+    // All class data calection
+    app.post("/allclass", async (req, res) => {
+      const data = req.body;
+      const result = await allClassCalection.insertOne(data);
+      res.send(result);
+    });
 
     // work
     // Send a ping to confirm a successful connection
