@@ -50,7 +50,42 @@ async function run() {
       const result = await usersCalection.insertOne(user);
       res.send(result);
     });
-    // All class data calection get
+    // id to All classData calection
+    app.get("/allclass/iddataloard/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allClassCalection.findOne(query);
+      // console.log(result);
+      res.send(result);
+    });
+    // id to all class data post
+    app.patch("/allclass/update/:id", async (req, res) => {
+      const data = req?.body;
+      const id = data?.id;
+      // console.log("this is newdata----", data);
+      const query = { _id: new ObjectId(id) };
+      const upDateDoc = {
+        $set: {
+          title: data?.title,
+          photoUrl: data?.photoUrl,
+          price: data?.price,
+          bio: data?.bio,
+        },
+      };
+      const result = await allClassCalection.updateOne(query, upDateDoc);
+      res.send(result);
+    });
+
+    // email to All classData calection
+    app.get("/allclass/useremail", async (req, res) => {
+      const email = req.query.email;
+      // console.log(email);
+      const query = { email: email };
+      const allClassData = allClassCalection.find(query);
+      const result = await allClassData.toArray();
+      res.send(result);
+    });
+    // email to All classData calection
     app.get("/allclass", async (req, res) => {
       const allClassData = allClassCalection.find();
       const result = await allClassData.toArray();
