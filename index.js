@@ -31,7 +31,25 @@ async function run() {
     const allClassCalection = client
       .db("educationManege")
       .collection("allClass");
+    const allAssignmentCalection = client
+      .db("educationManege")
+      .collection("allAssignment");
 
+    // post allassignment calection
+    app.post("/allassignment", async (req, res) => {
+      const data = req.body;
+      // console.log(data);
+      const result = await allAssignmentCalection.insertOne(data);
+      res.send(result);
+    });
+    // all assignment count
+    app.get("/allassignment/count/:email", async (req, res) => {
+      const email = req.params;
+      const totalassignment = await allAssignmentCalection
+        .find(email)
+        .toArray();
+      res.send(totalassignment);
+    });
     // get users calection
     app.get("/users", async (req, res) => {
       const users = usersCalection.find();
@@ -62,7 +80,7 @@ async function run() {
     app.patch("/allclass/update/:id", async (req, res) => {
       const data = req?.body;
       const id = data?.id;
-      // console.log("this is newdata----", data);
+
       const query = { _id: new ObjectId(id) };
       const upDateDoc = {
         $set: {
@@ -95,6 +113,13 @@ async function run() {
     app.post("/allclass", async (req, res) => {
       const data = req.body;
       const result = await allClassCalection.insertOne(data);
+      res.send(result);
+    });
+    // delete all class data calection
+    app.delete("/allclass/deleteone/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await allClassCalection.deleteOne(query);
       res.send(result);
     });
 
