@@ -34,7 +34,22 @@ async function run() {
     const allAssignmentCalection = client
       .db("educationManege")
       .collection("allAssignment");
+    const addTeacherCalection = client
+      .db("educationManege")
+      .collection("addteach");
 
+    // all add teacher on post
+    app.post("/addteach", async (req, res) => {
+      const data = req.body;
+      const email = data?.email;
+      const filter = { email: email };
+      const query = await addTeacherCalection.findOne(filter);
+      if (query) {
+        return;
+      }
+      const result = await addTeacherCalection.insertOne(data);
+      res.send(result);
+    });
     // post allassignment calection
     app.post("/allassignment", async (req, res) => {
       const data = req.body;
@@ -66,6 +81,13 @@ async function run() {
         return;
       }
       const result = await usersCalection.insertOne(user);
+      res.send(result);
+    });
+    // users calection find in email
+    app.get("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCalection.findOne(query);
       res.send(result);
     });
     // id to All classData calection
