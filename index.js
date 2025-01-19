@@ -38,6 +38,11 @@ async function run() {
       .db("educationManege")
       .collection("addteach");
 
+    // get all add teacher calection
+    app.get("/addteaches", async (req, res) => {
+      const result = await addTeacherCalection.find().toArray();
+      res.send(result);
+    });
     // all add teacher on post
     app.post("/addteach", async (req, res) => {
       const data = req.body;
@@ -48,6 +53,43 @@ async function run() {
         return;
       }
       const result = await addTeacherCalection.insertOne(data);
+      res.send(result);
+    });
+    // Add teacher id to addmin approve
+    app.patch("/addteach/approve/:id", async (req, res) => {
+      const data = req.body;
+      const id = req.params.id;
+      const queryOne = { _id: new ObjectId(id) };
+      const queryTwo = { email: data?.email };
+      const upDateDocOne = {
+        $set: {
+          status: data?.status,
+        },
+      };
+      const upDateDocTwo = {
+        $set: {
+          role: data?.role,
+        },
+      };
+      const resultOne = await addTeacherCalection.updateOne(
+        queryOne,
+        upDateDocOne
+      );
+      const resultTwo = await usersCalection.updateOne(queryTwo, upDateDocTwo);
+      res.send(resultOne);
+    });
+    // Rejected teacher to Addmin by id
+    app.patch("/addteach/reject/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      // console.log("------------", data);
+      const query = { _id: new ObjectId(id) };
+      const upDateDoc = {
+        $set: {
+          status: data?.status,
+        },
+      };
+      const result = await addTeacherCalection.updateOne(query, upDateDoc);
       res.send(result);
     });
     // post allassignment calection
@@ -71,7 +113,7 @@ async function run() {
       const result = await users.toArray();
       res.send(result);
     });
-    // post & seve user name,email,role in database
+    // user calection post & seve user name,email,role in database
     app.post("/users", async (req, res) => {
       const user = req.body;
       const email = user.email;
