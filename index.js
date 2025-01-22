@@ -37,7 +37,44 @@ async function run() {
     const addTeacherCalection = client
       .db("educationManege")
       .collection("addteach");
+    const paymentCalection = client
+      .db("educationManege")
+      .collection("payment-user");
 
+    // payment user post save data
+    app.post("/payment", async (req, res) => {
+      const data = req.body;
+      const result = await paymentCalection.insertOne(data);
+      res.send(result);
+    });
+    // prement to UpDate enroll coount number to all class
+    app.patch("/update/class/enroll", async (req, res) => {
+      const data = req.body;
+      const id = data?.calssId;
+      const filter = { _id: new ObjectId(id) };
+      const updateOne = {
+        $set: {
+          enroll: data?.enroll + 1,
+        },
+      };
+      const updateData = await allClassCalection.updateOne(filter, updateOne);
+      res.send(updateData);
+    });
+
+    // get user role
+    app.get("/onteach/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await usersCalection.findOne(query);
+      res.send(result);
+    });
+    // get user status
+    app.get("/onrole/:email", async (req, res) => {
+      const email = req.params?.email;
+      const query = { email: email };
+      const result = await addTeacherCalection.findOne(query);
+      res.send(result);
+    });
     // get all add teacher calection
     app.get("/addteaches", async (req, res) => {
       const result = await addTeacherCalection.find().toArray();
@@ -92,6 +129,20 @@ async function run() {
       const result = await addTeacherCalection.updateOne(query, upDateDoc);
       res.send(result);
     });
+
+    // user to teacher request another now
+    app.patch("/addteach/renue", async (req, res) => {
+      const data = req.body;
+      const query = { email: data?.email };
+      const upDateDoc = {
+        $set: {
+          status: "pending",
+        },
+      };
+      const result = await addTeacherCalection.updateOne(query, upDateDoc);
+      // console.log("-----------", result);
+      res.send(result);
+    });
     // post allassignment calection
     app.post("/allassignment", async (req, res) => {
       const data = req.body;
@@ -107,13 +158,19 @@ async function run() {
         .toArray();
       res.send(totalassignment);
     });
-    // get users calection
+    // get users calection // and search user bt addmin
     app.get("/users", async (req, res) => {
+      const search = req?.query?.search;
+      if (search) {
+        const filter = { name: { $regex: search, $options: "i" } };
+        const results = await usersCalection.find(filter).toArray();
+        return res.send(results);
+      }
       const users = usersCalection.find();
       const result = await users.toArray();
       res.send(result);
     });
-    // user calection post & seve user name,email,role in database
+    // users calection post & seve user name,email,role in database
     app.post("/users", async (req, res) => {
       const user = req.body;
       const email = user.email;
@@ -123,6 +180,19 @@ async function run() {
         return;
       }
       const result = await usersCalection.insertOne(user);
+      res.send(result);
+    });
+    // user has been Addmin by addmin users page
+    app.patch("/user/:id", async (req, res) => {
+      const userId = req.params?.id;
+      const data = req.body?.role;
+      const id = { _id: new ObjectId(userId) };
+      const upDateDoc = {
+        $set: {
+          role: data,
+        },
+      };
+      const result = await usersCalection.updateOne(id, upDateDoc);
       res.send(result);
     });
     // users calection find in email
@@ -157,7 +227,20 @@ async function run() {
       const result = await allClassCalection.updateOne(query, upDateDoc);
       res.send(result);
     });
-
+    // allclass data pprove,rejected,pogress by id in Addmin
+    app.patch("/allclass/approve/:id", async (req, res) => {
+      const id = req.params?.id;
+      const data = req.body;
+      const query = { _id: new ObjectId(id) };
+      const upDateDoc = {
+        $set: {
+          status: data?.status,
+        },
+      };
+      const result = await allClassCalection.updateOne(query, upDateDoc);
+      // console.log(result);
+      res.send(result);
+    });
     // email to All classData calection
     app.get("/allclass/useremail", async (req, res) => {
       const email = req.query.email;
