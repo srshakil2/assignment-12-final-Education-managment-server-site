@@ -40,7 +40,47 @@ async function run() {
     const paymentCalection = client
       .db("educationManege")
       .collection("payment-user");
+    const ratingCalection = client
+      .db("educationManege")
+      .collection("users-rating");
 
+    // post all rating for user
+    app.post("/rating/user", async (req, res) => {
+      const data = req.body;
+      const result = await ratingCalection.insertOne(data);
+      console.log(result);
+      res.send(result);
+    });
+    // assignment submition count wincriment
+    app.patch("/assignment/countincriment/:id", async (req, res) => {
+      const id = req.params.id;
+      const conutData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updatatedCount = {
+        $set: {
+          submition: conutData?.submition + conutData?.count,
+        },
+      };
+      const result = await allAssignmentCalection.updateOne(
+        query,
+        updatatedCount
+      );
+      res.send(result);
+    });
+    // get email to all assignment
+    app.get("/assignment/teather/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = await allAssignmentCalection.find(query).toArray();
+      res.send(result);
+    });
+    // my payment class
+    app.get("/payment/class/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { useremail: email };
+      const result = await paymentCalection.find(query).toArray();
+      res.send(result);
+    });
     // payment user post save data
     app.post("/payment", async (req, res) => {
       const data = req.body;
