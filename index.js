@@ -44,7 +44,27 @@ async function run() {
       .db("educationManege")
       .collection("users-rating");
 
-    // post all rating for user
+    // get total user enroll class
+    app.get("/total/users/class/enroll", async (req, res) => {
+      const queryClass = { status: "approves" };
+      const users = await usersCalection.find().toArray();
+      const classes = await allClassCalection.find(queryClass).toArray();
+      res.send({ users: users, classes: classes });
+    });
+    // get free class
+    app.get("/free/classes", async (req, res) => {
+      const query = {
+        status: "pogress",
+      };
+      const result = await allClassCalection.find(query).toArray();
+      res.send(result);
+    });
+    // get feedback in user
+    app.get("/rating", async (req, res) => {
+      const result = await ratingCalection.find().toArray();
+      res.send(result);
+    });
+    // post all rating / feedback for user
     app.post("/rating/user", async (req, res) => {
       const data = req.body;
       const result = await ratingCalection.insertOne(data);
