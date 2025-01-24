@@ -124,6 +124,7 @@ async function run() {
     // get user role
     app.get("/onteach/:email", async (req, res) => {
       const email = req.params.email;
+      // console.log(email);
       const query = { email: email };
       const result = await usersCalection.findOne(query);
       res.send(result);
