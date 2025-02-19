@@ -43,6 +43,9 @@ async function run() {
     const ratingCalection = client
       .db("educationManege")
       .collection("users-rating");
+    const problemsCalection = client
+      .db("educationManege")
+      .collection("problems");
 
     // get total user enroll class
     app.get("/total/users/class/enroll", async (req, res) => {
@@ -68,7 +71,7 @@ async function run() {
     app.post("/rating/user", async (req, res) => {
       const data = req.body;
       const result = await ratingCalection.insertOne(data);
-      console.log(result);
+      // console.log(result);
       res.send(result);
     });
     // assignment submition count wincriment
@@ -328,6 +331,14 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await allClassCalection.deleteOne(query);
+      res.send(result);
+    });
+
+    // users problems
+    app.post("/problems", async (req, res) => {
+      const data = req.body;
+      const result = await problemsCalection.insertOne(data);
+      // console.log(result);
       res.send(result);
     });
 
